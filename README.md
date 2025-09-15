@@ -69,3 +69,34 @@ component function gets called. But this can be an expensive operation.
     - memoized props to prevent wasted renders [together with memo]
     - Memoizing values to avoid expensive re-calculations on every render
     - Memoizing values that are used in dependency array of another hook
+
+# useEffect Dependency Array Rules
+
+- Every **state variable, prop & context value** used inside the effect **must** be included in the dependency array
+- All **reactive values** must be included. ie **Any function/variable** that reference any other reactive value
+- Dependencies choose themselves, **NEVER** ignore the exhaustive-deps ESLint rule
+- **DO NOT** use **objects or arrays** as dependencies (objects are re-created on each render and react sees new objects as different ie {} !== {})
+
+# Remove unnecessary dependencies
+
+### Removing function dependencies
+
+    - move function into the effect
+    - if we need function in xle places, memoize it(useCallback)
+    - if the function doesn't reference any reactive values, move it out of the component
+
+### Avoid Object dependencies
+
+    - instead of including the entire object, include **only the properties** you need ie primitive values
+    - if that does't work, use same strategies as for functions ie move/memoize object
+
+### Other strategies
+
+    - If we have xle related reactive values as dependencies try using a reducer ie useReducer
+    - no need to include setState(from useState) and dispatch(from useReducer) in the dependencies as react guarantees to be stable across renders
+
+### When not to use an Effect
+
+    - Responding to a user event, an event handler function should be used instead
+    - Fetching data on component mount, fine in small apps but in real-world app a library like React Query should be used
+    - Synchronizing  state changes with one another, try to use derived state/ event handlers
